@@ -6,11 +6,10 @@ import {
   GitPullRequest, 
   Tag, 
   Clock, 
-  Zap,
   Github,
-  Ship,
-  RefreshCw,
-  AlertCircle
+  Box,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './index.css';
@@ -36,7 +35,6 @@ const App: React.FC = () => {
   const [activity, setActivity] = useState<ActivityData | null>(null);
   const [events, setEvents] = useState<RepoEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -46,10 +44,8 @@ const App: React.FC = () => {
       ]);
       setActivity(activityRes.data);
       setEvents(eventsRes.data);
-      setError(false);
     } catch (err) {
-      console.error('Error fetching dashboard data:', err);
-      setError(true);
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -57,195 +53,155 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 5000); // Faster polling for real-time feel
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#020205]">
-        <motion.div 
-          animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="text-[#00d2ff] font-black text-2xl tracking-widest uppercase italic"
-        >
-          Calibrating Pulse...
-        </motion.div>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   return (
     <div className="app-container">
-      <div className="app-overlay" />
       
-      <main className="dashboard-root">
+      {/* Main Content Area */}
+      <main className="flex flex-col gap-10">
         
-        {/* Left Side: Main Dash */}
-        <div className="flex flex-col gap-12">
+        {/* Header Unit */}
+        <header className="flex justify-between items-end border-b border-white/[0.05] pb-8">
+          <div>
+            <h1 className="dashboard-title">
+              Repo<span className="text-blue-500">Pulse</span>
+            </h1>
+            <div className="status-indicator">
+              <div className="dot-pulse" />
+              <span>System Operational</span>
+              <span className="mx-2 opacity-20">|</span>
+              <Github size={14} className="opacity-50" />
+              <span className="font-medium text-xs">{activity?.repository}</span>
+            </div>
+          </div>
           
-          {/* Header Section */}
-          <header className="flex flex-col md:flex-row justify-between items-start gap-8 mt-4">
-            <div>
-              <motion.h1 
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="dashboard-title italic"
-              >
-                REPO<span className="text-[#00d2ff]">PULSE</span>
-              </motion.h1>
-              <div className="flex gap-4 items-center">
-                <div className="status-check bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-                  Internal Node: Active
-                </div>
-                <p className="text-[#94a3b8] font-medium flex items-center gap-2">
-                  <Github className="w-4 h-4" /> {activity?.repository || 'System Standby'}
-                </p>
-              </div>
+          <div className="text-right">
+            <span className="section-label">Pulse Score</span>
+            <div className="text-4xl font-black text-white mt-1 leading-none">
+              {activity?.activity_score}
             </div>
+          </div>
+        </header>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="score-badge flex items-center gap-6"
-            >
-              <div className="text-right">
-                <p className="text-[10px] font-black tracking-[0.2em] uppercase text-white/60 mb-1">Index Score</p>
-                <div className="score-value tracking-tighter text-white">{activity?.activity_score || 0}</div>
-              </div>
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <Activity className="w-8 h-8 text-white" />
-              </div>
-            </motion.div>
-          </header>
-
-          {/* Metrics Grid */}
-          <section className="metrics-grid">
-            <MetricCard 
-              label="Last Ingest" 
-              value={activity?.last_push ? new Date(activity.last_push).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '---'} 
-              sub={activity?.last_push ? new Date(activity.last_push).toLocaleDateString() : 'NO RECENT DATA'}
-              icon={<Clock className="w-5 h-5 text-[#00d2ff]" />}
-            />
-            <MetricCard 
-              label="Commit Vol (24h)" 
+        {/* Primary Metrics */}
+        <section>
+          <div className="flex items-center gap-2 mb-6">
+            <Activity size={18} className="text-blue-500" />
+            <h2 className="text-lg font-bold">Repository Health</h2>
+          </div>
+          
+          <div className="metrics-grid">
+            <MetricTile 
+              title="Commits (24h)" 
               value={activity?.commits_last_24h || 0} 
-              icon={<GitCommit className="w-5 h-5 text-[#6366f1]" />}
+              icon={<GitCommit size={20} />} 
+              color="text-blue-400"
             />
-            <MetricCard 
-              label="PR Frequency" 
+            <MetricTile 
+              title="Open PRs" 
               value={activity?.pull_requests_open || 0} 
-              icon={<GitPullRequest className="w-5 h-5 text-[#22d3ee]" />}
+              icon={<GitPullRequest size={20} />} 
+              color="text-purple-400"
             />
-            <MetricCard 
-              label="Production Cycles" 
+            <MetricTile 
+              title="Releases" 
               value={activity?.releases || 0} 
-              icon={<Ship className="w-5 h-5 text-emerald-400" />}
+              icon={<Box size={20} />} 
+              color="text-emerald-400"
             />
-          </section>
+          </div>
+        </section>
 
-          {/* Error State */}
-          {error && (
-            <div className="card-glass p-6 border-red-500/30 bg-red-500/5 flex items-center gap-4">
-              <AlertCircle className="text-red-500" />
-              <p className="text-sm font-semibold">Telemetry connection weak. Retrying automated fetch...</p>
+        {/* Secondary Info Area */}
+        <div className="grid grid-cols-2 gap-6">
+          <div className="glass-panel p-6">
+            <div className="flex items-center justify-between mb-4">
+              <span className="section-label">Last Synchronization</span>
+              <Clock size={16} className="text-slate-500" />
             </div>
-          )}
+            <div className="text-xl font-bold">
+              {activity?.last_push ? new Date(activity.last_push).toLocaleTimeString() : '---'}
+            </div>
+            <div className="text-sm text-slate-500 mt-1">
+              {activity?.last_push ? new Date(activity.last_push).toDateString() : 'No recent activity'}
+            </div>
+          </div>
 
-          {/* Large Hero Card (Space for Graph later) */}
-          <div className="card-glass flex-1 min-h-[400px] p-8 flex flex-col justify-center items-center text-center">
-            <div className="w-20 h-20 rounded-full bg-[#00d2ff]/10 border border-[#00d2ff]/30 flex items-center justify-center mb-6">
-              <Zap className="w-8 h-8 text-[#00d2ff]" />
-            </div>
-            <h3 className="text-2xl font-bold mb-2 tracking-tight">System Optimized</h3>
-            <p className="text-[#94a3b8] max-w-md">Continuous monitoring active for {activity?.repository}. Dynamic score aggregation in progress.</p>
+          <div className="glass-panel p-6 flex flex-col justify-center items-center text-center group cursor-pointer hover:bg-white/[0.03]">
+             <ExternalLink size={24} className="text-slate-600 mb-2 group-hover:text-blue-500 transition-colors" />
+             <span className="text-sm font-semibold">View Repository</span>
           </div>
         </div>
-
-        {/* Right Side: Event Pulse */}
-        <aside className="pulse-sidebar">
-          <div className="card-glass flex-1 flex flex-col">
-            <div className="feed-header">
-              <span className="flex items-center gap-2">EVENT PULSE</span>
-              <div className="live-indicator">
-                <motion.div 
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                  className="pulse-dot" 
-                />
-                Live
-              </div>
-            </div>
-            
-            <div className="feed-items custom-scrollbar">
-              <AnimatePresence mode="popLayout">
-                {events.length > 0 ? (
-                  events.map((event, idx) => (
-                    <EventItem key={event._id} event={event} index={idx} />
-                  ))
-                ) : (
-                  <div className="text-center py-20 opacity-30 italic font-medium">Listening for events...</div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="p-4 border-t border-white/5 text-[10px] text-center text-[#94a3b8] font-bold tracking-widest uppercase">
-              RepoPulse Terminal v1.1
-            </div>
-          </div>
-        </aside>
-
       </main>
+
+      {/* Sidebar Feed Area */}
+      <aside className="sidebar">
+        <div className="glass-panel feed-container">
+          <div className="feed-header flex justify-between items-center">
+            <span>LIVE EVENT FEED</span>
+            <span className="opacity-30 text-[10px] font-mono">v1.2.0</span>
+          </div>
+          <div className="feed-scroll">
+            <AnimatePresence mode="popLayout">
+              {events.map((event, idx) => (
+                <FeedItem key={event._id} event={event} />
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
+        
+        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center">
+          Continuous Ingestion Active
+        </div>
+      </aside>
+
     </div>
   );
 };
 
-const MetricCard: React.FC<{label: string, value: any, sub?: string, icon: React.ReactNode}> = ({ label, value, sub, icon }) => (
-  <motion.div 
-    whileHover={{ scale: 1.02, y: -5 }}
-    transition={{ type: "spring", stiffness: 300 }}
-    className="card-glass"
-  >
-    <div className="metric-card-inner">
-      <div className="metric-header">
-        <span className="metric-label">{label}</span>
-        <div className="icon-box">{icon}</div>
-      </div>
-      <div className="metric-value-large">{value}</div>
-      {sub && <div className="text-[#94a3b8] text-[10px] font-bold mt-2 tracking-widest">{sub}</div>}
-      
-      {/* Decorative Glow */}
-      <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-[#00d2ff]/5 blur-3xl rounded-full" />
+const MetricTile: React.FC<{title: string, value: number, icon: React.ReactNode, color: string}> = ({ title, value, icon, color }) => (
+  <div className="glass-panel metric-card">
+    <div className="flex justify-between items-start">
+      <span className="section-label text-[10px]">{title}</span>
+      <div className={`${color} opacity-80`}>{icon}</div>
     </div>
-  </motion.div>
+    <div className="metric-value">{value}</div>
+    <div className="w-12 h-1 bg-slate-800 rounded-full mt-2 overflow-hidden">
+      <motion.div 
+        initial={{ width: 0 }}
+        animate={{ width: '100%' }}
+        className={`h-full ${color.replace('text', 'bg')}`}
+      />
+    </div>
+  </div>
 );
 
-const EventItem: React.FC<{event: RepoEvent, index: number}> = ({ event, index }) => (
+const FeedItem: React.FC<{event: RepoEvent}> = ({ event }) => (
   <motion.div 
     layout
-    initial={{ opacity: 0, x: 30 }}
-    animate={{ opacity: 1, x: 0 }}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, scale: 0.95 }}
-    transition={{ delay: index * 0.05 }}
-    className="mb-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-all group"
+    className="feed-item"
   >
-    <div className="flex justify-between items-center mb-2">
-      <span className={`text-[9px] font-black px-2 py-0.5 rounded tracking-widest uppercase ${
-        event.event_type === 'push' ? 'bg-cyan-500/20 text-cyan-400' : 
-        event.event_type === 'pull_request' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-emerald-500/20 text-emerald-400'
-      }`}>
+    <div className="flex items-center justify-between mb-2">
+      <span className={`badge badge-${event.event_type}`}>
         {event.event_type}
       </span>
-      <span className="text-[10px] font-mono opacity-30">{new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      <span className="text-[10px] text-slate-500 font-mono">
+        {new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </span>
     </div>
-    <div className="text-xs font-medium text-white/70">
-      <span className="text-[#00d2ff] font-bold">@</span>{event.payload.sender?.login}
-      <span className="opacity-50 ml-1">triggered atomic update</span>
+    <div className="text-sm font-medium flex items-center gap-1">
+      <span className="text-blue-500">@</span>
+      {event.payload.sender?.login}
+      <ChevronRight size={12} className="opacity-20" />
     </div>
-    
-    {/* Micro interaction glow */}
-    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-[#00d2ff] opacity-0 group-hover:opacity-100 transition-opacity rounded-r" />
   </motion.div>
 );
 
