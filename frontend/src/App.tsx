@@ -122,22 +122,22 @@ const App: React.FC = () => {
 
         {/* Secondary Info Area */}
         <div className="info-row">
-          <div className="glass-panel p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="glass-panel info-card">
+            <div className="flex justify-between items-center mb-6">
               <span className="section-label">Last Synchronization</span>
-              <Clock size={16} className="text-slate-500" />
+              <Clock size={18} className="text-slate-500" />
             </div>
-            <div className="text-xl font-bold">
+            <div className="text-2xl font-bold text-white mb-1">
               {activity?.last_push ? new Date(activity.last_push).toLocaleTimeString() : '---'}
             </div>
-            <div className="text-sm text-slate-500 mt-1">
+            <div className="text-sm text-slate-500 font-medium">
               {activity?.last_push ? new Date(activity.last_push).toDateString() : 'No recent activity'}
             </div>
           </div>
 
-          <div className="glass-panel p-6 flex flex-col justify-center items-center text-center group cursor-pointer hover:bg-white/[0.03]">
-             <ExternalLink size={24} className="text-slate-600 mb-2 group-hover:text-blue-500 transition-colors" />
-             <span className="text-sm font-semibold">View Repository</span>
+          <div className="glass-panel info-card flex flex-col justify-center items-center text-center group cursor-pointer hover:bg-white/[0.03]">
+             <ExternalLink size={28} className="text-slate-600 mb-3 group-hover:text-blue-500 transition-colors" />
+             <span className="text-sm font-bold tracking-wide uppercase">View Project Repository</span>
           </div>
         </div>
       </main>
