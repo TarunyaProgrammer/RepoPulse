@@ -46,6 +46,18 @@
 .text-white { color: #fff; }
 .text-blue-500 { color: #3b82f6; }
 
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-4xl { font-size: 2.25rem; }
+.font-bold { font-weight: 700; }
+.font-black { font-weight: 900; }
+.font-mono { font-family: monospace; }
+.tracking-wide { letter-spacing: 0.05em; }
+.uppercase { text-transform: uppercase; }
+
 * {
   box-sizing: border-box;
   margin: 0;
