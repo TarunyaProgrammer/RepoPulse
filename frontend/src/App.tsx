@@ -4,7 +4,6 @@ import {
   Activity, 
   GitCommit, 
   GitPullRequest, 
-  Tag, 
   Clock, 
   Github,
   Box,
@@ -27,7 +26,7 @@ interface ActivityData {
 interface RepoEvent {
   _id: string;
   event_type: string;
-  payload: any;
+  payload: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -118,7 +117,7 @@ const App: React.FC = () => {
         </section>
 
         {/* Secondary Info Area */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="info-row">
           <div className="glass-panel p-6">
             <div className="flex items-center justify-between mb-4">
               <span className="section-label">Last Synchronization</span>
@@ -139,16 +138,18 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Sidebar Feed Area */}
-      <aside className="sidebar">
-        <div className="glass-panel feed-container">
-          <div className="feed-header flex justify-between items-center">
-            <span>LIVE EVENT FEED</span>
-            <span className="opacity-30 text-[10px] font-mono">v1.2.0</span>
-          </div>
-          <div className="feed-scroll">
+        <aside className="sidebar">
+          <div className="glass-panel feed-container">
+            <div className="feed-header flex justify-between items-center group">
+              <span className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                LIVE EVENT FEED
+              </span>
+              <span className="opacity-20 text-[9px] font-mono tracking-tighter">V1.2.0</span>
+            </div>
+            <div className="feed-scroll">
             <AnimatePresence mode="popLayout">
-              {events.map((event, idx) => (
+              {events.map((event) => (
                 <FeedItem key={event._id} event={event} />
               ))}
             </AnimatePresence>

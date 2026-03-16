@@ -23,6 +23,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/repopulse
 initWorker();
 
 // Routes
+app.get('/', (req, res) => {
+  res.send('<h1>RepoPulse Backend</h1><p>API is active. Visit the dashboard at <a href="http://localhost:7180">http://localhost:7180</a></p>');
+});
+
 app.post('/webhook/github', handleGithubWebhook);
 
 // API Endpoints
