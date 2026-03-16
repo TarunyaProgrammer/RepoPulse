@@ -4,6 +4,42 @@
 
 ![Dashboard Preview](https://via.placeholder.com/1200x600.png?text=RepoPulse+Mission+Control+Dashboard)
 
+## 🏗️ Architecture Visualization
+
+```mermaid
+graph TD
+    subgraph "External World"
+        GH[GitHub Repository]
+        NGR[ngrok Tunnel]
+    end
+
+    subgraph "Ingestion Layer"
+        EX[Express Server]
+        SIG[Signature Verification]
+    end
+
+    subgraph "Processing Layer"
+        RED[Redis Stack]
+        BMQ[BullMQ Producer]
+        WKR[Background Worker]
+    end
+
+    subgraph "Data & Dashboard"
+        MDB[(MongoDB)]
+        VITE[Vite + React Dashboard]
+    end
+
+    GH -->|Events| NGR
+    NGR -->|HTTPS| EX
+    EX --> SIG
+    SIG -->|Valid| BMQ
+    BMQ -->|Job| RED
+    RED -->|Process| WKR
+    WKR -->|Sync| MDB
+    VITE -->|Poll| EX
+    EX -->|Query| MDB
+```
+
 ## 🌟 Key Features
 
 ### 📡 Event-Driven Pipeline
@@ -71,6 +107,7 @@ To see real events on your dashboard, you must expose your local server to GitHu
 1.  **Authenticate ngrok**:
     - Sign up for a free account at [ngrok.com](https://dashboard.ngrok.com/signup).
     - Get your authtoken from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken).
+    - **⚠️ Important**: Do not use "Client Credentials" (starting with `cr_`). Use the actual **Authtoken** found in the "Your Authtoken" sidebar section.
     - Run the command: `ngrok config add-authtoken <your-authtoken>`
 2.  **Start ngrok**:
     ```bash
