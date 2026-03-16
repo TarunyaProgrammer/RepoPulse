@@ -68,7 +68,11 @@ docker-compose up -d
 
 To see real events on your dashboard, you must expose your local server to GitHub.
 
-1.  **Start ngrok**:
+1.  **Authenticate ngrok**:
+    - Sign up for a free account at [ngrok.com](https://dashboard.ngrok.com/signup).
+    - Get your authtoken from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken).
+    - Run the command: `ngrok config add-authtoken <your-authtoken>`
+2.  **Start ngrok**:
     ```bash
     ngrok http 4100
     ```
