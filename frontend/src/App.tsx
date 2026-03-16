@@ -26,7 +26,11 @@ interface ActivityData {
 interface RepoEvent {
   _id: string;
   event_type: string;
-  payload: Record<string, unknown>;
+  payload: {
+    sender?: {
+      login: string;
+    };
+  };
   timestamp: string;
 }
 
@@ -167,12 +171,12 @@ const App: React.FC = () => {
 
 const MetricTile: React.FC<{title: string, value: number, icon: React.ReactNode, color: string}> = ({ title, value, icon, color }) => (
   <div className="glass-panel metric-card">
-    <div className="flex justify-between items-start">
+    <div className="flex justify-between items-start mb-2">
       <span className="section-label text-[10px]">{title}</span>
       <div className={`${color} opacity-80`}>{icon}</div>
     </div>
-    <div className="metric-value">{value}</div>
-    <div className="w-12 h-1 bg-slate-800 rounded-full mt-2 overflow-hidden">
+    <div className="metric-value py-2">{value}</div>
+    <div className="w-12 h-1 bg-slate-800 rounded-full mt-4 overflow-hidden">
       <motion.div 
         initial={{ width: 0 }}
         animate={{ width: '100%' }}
@@ -190,7 +194,7 @@ const FeedItem: React.FC<{event: RepoEvent}> = ({ event }) => (
     exit={{ opacity: 0, scale: 0.95 }}
     className="feed-item"
   >
-    <div className="flex items-center justify-between mb-2">
+    <div className="flex items-center justify-between mb-1">
       <span className={`badge badge-${event.event_type}`}>
         {event.event_type}
       </span>
@@ -198,7 +202,7 @@ const FeedItem: React.FC<{event: RepoEvent}> = ({ event }) => (
         {new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </span>
     </div>
-    <div className="text-sm font-medium flex items-center gap-1">
+    <div className="text-sm font-medium flex items-center gap-1 mt-2">
       <span className="text-blue-500">@</span>
       {event.payload.sender?.login}
       <ChevronRight size={12} className="opacity-20" />
