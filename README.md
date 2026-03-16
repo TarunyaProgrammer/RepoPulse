@@ -2,7 +2,7 @@
 
 **RepoPulse** is a production-grade, event-driven monitoring pipeline that provides real-time visibility into GitHub repository activity. It transforms raw webhook events into a strategic "Mission Control" dashboard, featuring high-density metrics and a live activity pulse.
 
-![Dashboard Preview](https://via.placeholder.com/1200x600.png?text=RepoPulse+Mission+Control+Dashboard)
+![Dashboard Preview](./Preview.png)
 
 ## 🏗️ Architecture Visualization
 
